@@ -304,7 +304,7 @@ const StoreComparison = () => {
                       {sp.name}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                      R$ {sp.price.toFixed(2)}
+                       {sp.price.toFixed(2)} KZ
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                       {sp.stock}
