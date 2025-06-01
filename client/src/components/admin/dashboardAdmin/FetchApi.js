@@ -133,3 +133,59 @@ export const postAddStoreProduct = async (data) => {
     throw error;
   }
 };
+
+export const deleteStore = async (storeId) => {
+  try {
+    const response = await axios.delete(`${apiURL}/api/stores/${storeId}`);
+    return response.data;
+  } catch (error) {
+    console.error("Error in deleteStore API call:", error);
+    if (error.response) {
+      console.error("Error response data:", error.response.data);
+      console.error("Error response status:", error.response.status);
+    }
+    throw error;
+  }
+};
+
+export const updateStore = async (storeId, name) => {
+  try {
+    const response = await axios.put(`${apiURL}/api/stores/${storeId}`, { name });
+    return response.data;
+  } catch (error) {
+    console.error("Error in updateStore API call:", error);
+    if (error.response) {
+      console.error("Error response data:", error.response.data);
+      console.error("Error response status:", error.response.status);
+    }
+    throw error;
+  }
+};
+
+export const deleteStoreProduct = async (storeId, productId) => {
+  try {
+    const response = await axios.delete(`${apiURL}/api/stores/store-products/${storeId}/${productId}`);
+    return response.data;
+  } catch (error) {
+    console.error("Error in deleteStoreProduct API call:", error);
+    if (error.response) {
+      console.error("Error response data:", error.response.data);
+      console.error("Error response status:", error.response.status);
+    }
+    throw error;
+  }
+};
+
+export const updateStoreProduct = async (storeId, productId, data) => {
+  try {
+    const response = await axios.put(`${apiURL}/api/stores/store-products/${storeId}/${productId}`, data);
+    return response.data;
+  } catch (error) {
+    console.error("Error in updateStoreProduct API call:", error);
+    if (error.response) {
+      console.error("Error response data:", error.response.data);
+      console.error("Error response status:", error.response.status);
+    }
+    throw error;
+  }
+};

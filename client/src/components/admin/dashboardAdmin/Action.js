@@ -7,6 +7,10 @@ import {
   postAddStore,
   getStoreProducts,
   postAddStoreProduct,
+  deleteStore as deleteStoreApi,
+  updateStore as updateStoreApi,
+  deleteStoreProduct as deleteStoreProductApi,
+  updateStoreProduct as updateStoreProductApi,
 } from "./FetchApi";
 import { getAllOrder } from "../orders/FetchApi.js";
 
@@ -81,6 +85,23 @@ export const fetchStores = async (dispatch) => {
   }
 };
 
+export const deleteStore = async (storeId, dispatch) => {
+  try {
+    let responseData = await deleteStoreApi(storeId);
+    if (responseData && responseData.success) {
+      dispatch({ type: "storeDeleteSuccess", payload: responseData.success });
+      // Refresh stores list
+      await fetchStores(dispatch);
+    } else if (responseData && responseData.error) {
+      dispatch({ type: "storeDeleteError", payload: responseData.error });
+    }
+    return responseData;
+  } catch (error) {
+    console.error("Error deleting store:", error);
+    throw error;
+  }
+};
+
 export const addStore = async (name, dispatch) => {
   try {
     let responseData = await postAddStore(name);
@@ -94,6 +115,23 @@ export const addStore = async (name, dispatch) => {
     return responseData;
   } catch (error) {
     console.error("Error adding store:", error);
+    throw error;
+  }
+};
+
+export const updateStore = async (storeId, name, dispatch) => {
+  try {
+    let responseData = await updateStoreApi(storeId, name);
+    if (responseData && responseData.success) {
+      dispatch({ type: "storeUpdateSuccess", payload: responseData.success });
+      // Refresh stores list
+      await fetchStores(dispatch);
+    } else if (responseData && responseData.error) {
+      dispatch({ type: "storeUpdateError", payload: responseData.error });
+    }
+    return responseData;
+  } catch (error) {
+    console.error("Error updating store:", error);
     throw error;
   }
 };
@@ -128,6 +166,40 @@ export const addStoreProduct = async (data, dispatch) => {
     return responseData;
   } catch (error) {
     console.error("Error adding store product:", error);
+    throw error;
+  }
+};
+
+export const deleteStoreProduct = async (storeId, productId, dispatch) => {
+  try {
+    let responseData = await deleteStoreProductApi(storeId, productId);
+    if (responseData && responseData.success) {
+      dispatch({ type: "storeProductDeleteSuccess", payload: responseData.success });
+      // Refresh store products
+      await fetchStoreProducts(productId, dispatch);
+    } else if (responseData && responseData.error) {
+      dispatch({ type: "storeProductDeleteError", payload: responseData.error });
+    }
+    return responseData;
+  } catch (error) {
+    console.error("Error deleting store product:", error);
+    throw error;
+  }
+};
+
+export const updateStoreProduct = async (storeId, productId, data, dispatch) => {
+  try {
+    let responseData = await updateStoreProductApi(storeId, productId, data);
+    if (responseData && responseData.success) {
+      dispatch({ type: "storeProductUpdateSuccess", payload: responseData.success });
+      // Refresh store products
+      await fetchStoreProducts(productId, dispatch);
+    } else if (responseData && responseData.error) {
+      dispatch({ type: "storeProductUpdateError", payload: responseData.error });
+    }
+    return responseData;
+  } catch (error) {
+    console.error("Error updating store product:", error);
     throw error;
   }
 };

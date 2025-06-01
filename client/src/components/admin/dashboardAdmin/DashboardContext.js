@@ -7,9 +7,17 @@ export const dashboardState = {
   storesList: [],
   storeAddSuccess: null,
   storeAddError: null,
+  storeDeleteSuccess: null,
+  storeDeleteError: null,
+  storeUpdateSuccess: null,
+  storeUpdateError: null,
   storeProductsList: [],
   storeProductAddSuccess: null,
   storeProductAddError: null,
+  storeProductDeleteSuccess: null,
+  storeProductDeleteError: null,
+  storeProductUpdateSuccess: null,
+  storeProductUpdateError: null,
   productsList: [],
 };
 
@@ -57,6 +65,30 @@ export const dashboardReducer = (state, action) => {
         storeAddError: action.payload,
         storeAddSuccess: null,
       };
+    case "storeDeleteSuccess":
+      return {
+        ...state,
+        storeDeleteSuccess: action.payload,
+        storeDeleteError: null,
+      };
+    case "storeDeleteError":
+      return {
+        ...state,
+        storeDeleteError: action.payload,
+        storeDeleteSuccess: null,
+      };
+    case "storeUpdateSuccess":
+      return {
+        ...state,
+        storeUpdateSuccess: action.payload,
+        storeUpdateError: null,
+      };
+    case "storeUpdateError":
+      return {
+        ...state,
+        storeUpdateError: action.payload,
+        storeUpdateSuccess: null,
+      };
     case "storeProductsList":
       return {
         ...state,
@@ -73,6 +105,30 @@ export const dashboardReducer = (state, action) => {
         ...state,
         storeProductAddError: action.payload,
         storeProductAddSuccess: null,
+      };
+    case "storeProductDeleteSuccess":
+      return {
+        ...state,
+        storeProductDeleteSuccess: action.payload,
+        storeProductDeleteError: null,
+      };
+    case "storeProductDeleteError":
+      return {
+        ...state,
+        storeProductDeleteError: action.payload,
+        storeProductDeleteSuccess: null,
+      };
+    case "storeProductUpdateSuccess":
+      return {
+        ...state,
+        storeProductUpdateSuccess: action.payload,
+        storeProductUpdateError: null,
+      };
+    case "storeProductUpdateError":
+      return {
+        ...state,
+        storeProductUpdateError: action.payload,
+        storeProductUpdateSuccess: null,
       };
     case "productsList":
       return {

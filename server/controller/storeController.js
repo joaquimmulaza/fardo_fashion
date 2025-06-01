@@ -86,7 +86,7 @@ class StoreController {
         stock
       });
       await newStoreProduct.save();
-      return res.json({ success: "Product successfully associated with store." });
+      return res.json({ success: "Produto associado com sucesso a loja." });
     } catch (err) {
       console.error("Error in addStoreProduct:", err);
       
@@ -120,6 +120,7 @@ class StoreController {
       // Formata a resposta para conter apenas os campos necessários
       const result = storeProducts.map((sp) => ({
         name: sp.store.name,
+        storeId: sp.store._id,
         price: sp.price,
         stock: sp.stock,
       }));
@@ -137,6 +138,167 @@ class StoreController {
     } catch (err) {
       console.log(err);
       return res.status(500).json({ error: "Erro ao buscar lojas." });
+    }
+  }
+
+  async deleteStore(req, res) {
+    const { storeId } = req.params;
+    
+    if (!storeId) {
+      return res.status(400).json({ error: "Store ID is required." });
+    }
+
+    try {
+      // Validate ObjectId format
+      if (!mongoose.Types.ObjectId.isValid(storeId)) {
+        return res.status(400).json({ error: "Invalid store ID format." });
+      }
+
+      // Check if store exists
+      const store = await storeModel.findById(storeId);
+      if (!store) {
+        return res.status(404).json({ error: "Store not found." });
+      }
+
+      // Delete all store-product associations first
+      await storeProductModel.deleteMany({ store: storeId });
+
+      // Delete the store
+      await storeModel.findByIdAndDelete(storeId);
+
+      return res.json({ success: "Loja excluída com sucesso." });
+    } catch (err) {
+      console.error("Error in deleteStore:", err);
+      return res.status(500).json({ error: "Erro ao excluir loja." });
+    }
+  }
+
+  async updateStore(req, res) {
+    const { storeId } = req.params;
+    const { name } = req.body;
+
+    if (!storeId) {
+      return res.status(400).json({ error: "ID da loja é obrigatório." });
+    }
+
+    if (!name || name.trim() === "") {
+      return res.status(400).json({ error: "Nome da loja é obrigatório." });
+    }
+
+    try {
+      // Validate ObjectId format
+      if (!mongoose.Types.ObjectId.isValid(storeId)) {
+        return res.status(400).json({ error: "Formato de ID inválido." });
+      }
+
+      // Check if store exists
+      const store = await storeModel.findById(storeId);
+      if (!store) {
+        return res.status(404).json({ error: "Loja não encontrada." });
+      }
+
+      // Check if new name already exists for another store
+      const existingStore = await storeModel.findOne({ 
+        name: name.trim(),
+        _id: { $ne: storeId } // Exclude current store from check
+      });
+      
+      if (existingStore) {
+        return res.status(409).json({ error: "Já existe uma loja com este nome." });
+      }
+
+      // Update store
+      store.name = name.trim();
+      await store.save();
+
+      return res.json({ success: "Loja atualizada com sucesso." });
+    } catch (err) {
+      console.error("Error in updateStore:", err);
+      return res.status(500).json({ error: "Erro ao atualizar loja." });
+    }
+  }
+
+  async deleteStoreProduct(req, res) {
+    const { storeId, productId } = req.params;
+
+    if (!storeId || !productId) {
+      return res.status(400).json({ error: "ID da loja e ID do produto são obrigatórios." });
+    }
+
+    try {
+      // Validate ObjectId format
+      if (!mongoose.Types.ObjectId.isValid(storeId) || !mongoose.Types.ObjectId.isValid(productId)) {
+        return res.status(400).json({ error: "Formato de ID inválido." });
+      }
+
+      // Check if association exists
+      const association = await storeProductModel.findOne({ 
+        store: storeId,
+        product: productId
+      });
+
+      if (!association) {
+        return res.status(404).json({ error: "Associação não encontrada." });
+      }
+
+      // Delete the association
+      await storeProductModel.deleteOne({ 
+        store: storeId,
+        product: productId
+      });
+
+      return res.json({ success: "Produto desassociado da loja com sucesso." });
+    } catch (err) {
+      console.error("Error in deleteStoreProduct:", err);
+      return res.status(500).json({ error: "Erro ao desassociar produto da loja." });
+    }
+  }
+
+  async updateStoreProduct(req, res) {
+    const { storeId, productId } = req.params;
+    const { price, stock } = req.body;
+
+    if (!storeId || !productId) {
+      return res.status(400).json({ error: "ID da loja e ID do produto são obrigatórios." });
+    }
+
+    if (price === undefined || stock === undefined) {
+      return res.status(400).json({ error: "Preço e estoque são obrigatórios." });
+    }
+
+    if (isNaN(Number(price)) || Number(price) < 0) {
+      return res.status(400).json({ error: "Preço inválido." });
+    }
+
+    if (isNaN(Number(stock)) || Number(stock) < 0) {
+      return res.status(400).json({ error: "Estoque inválido." });
+    }
+
+    try {
+      // Validate ObjectId format
+      if (!mongoose.Types.ObjectId.isValid(storeId) || !mongoose.Types.ObjectId.isValid(productId)) {
+        return res.status(400).json({ error: "Formato de ID inválido." });
+      }
+
+      // Check if association exists
+      const association = await storeProductModel.findOne({ 
+        store: storeId,
+        product: productId
+      });
+
+      if (!association) {
+        return res.status(404).json({ error: "Associação não encontrada." });
+      }
+
+      // Update the association
+      association.price = Number(price);
+      association.stock = Number(stock);
+      await association.save();
+
+      return res.json({ success: "Associação atualizada com sucesso." });
+    } catch (err) {
+      console.error("Error in updateStoreProduct:", err);
+      return res.status(500).json({ error: "Erro ao atualizar associação." });
     }
   }
 }
