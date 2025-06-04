@@ -19,6 +19,7 @@ const EditProductModal = (props) => {
     pQuantity: "",
     pPrice: "",
     pOffer: "",
+    pSize: "",
     error: false,
     success: false,
   });
@@ -50,6 +51,7 @@ const EditProductModal = (props) => {
         pQuantity: data.editProductModal.pQuantity || "",
         pPrice: data.editProductModal.pPrice || "",
         pOffer: data.editProductModal.pOffer || "",
+        pSize: data.editProductModal.pSize || "",
       });
     }
   }, [data.editProductModal]);
@@ -277,6 +279,24 @@ const EditProductModal = (props) => {
             </div>
             <div className="flex space-x-1 py-4">
               <div className="w-1/2 flex flex-col space-y-1">
+                <label htmlFor="size">Tamanho</label>
+                <input
+                  value={editformData.pSize}
+                  onChange={(e) =>
+                    setEditformdata({
+                      ...editformData,
+                      error: false,
+                      success: false,
+                      pSize: e.target.value,
+                    })
+                  }
+                  type="text"
+                  className="px-4 py-2 border focus:outline-none"
+                  id="size"
+                  placeholder="Ex: 42, G, M, etc"
+                />
+              </div>
+              <div className="w-1/2 flex flex-col space-y-1">
                 <label htmlFor="quantity">Quantidade *</label>
                 <input
                   value={editformData.pQuantity}
@@ -293,6 +313,8 @@ const EditProductModal = (props) => {
                   id="quantity"
                 />
               </div>
+            </div>
+            <div className="flex space-x-1 py-4">
               <div className="w-1/2 flex flex-col space-y-1">
                 <label htmlFor="offer">Oferta (%)</label>
                 <input

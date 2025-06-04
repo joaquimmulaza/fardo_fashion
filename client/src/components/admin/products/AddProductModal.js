@@ -19,6 +19,7 @@ const AddProductDetail = ({ categories }) => {
     pPrice: "",
     pOffer: 0,
     pQuantity: "",
+    pSize: "",
     success: false,
     error: false,
   });
@@ -60,6 +61,7 @@ const AddProductDetail = ({ categories }) => {
           pPrice: "",
           pQuantity: "",
           pOffer: 0,
+          pSize: "",
           success: responseData.success,
           error: false,
         });
@@ -74,6 +76,7 @@ const AddProductDetail = ({ categories }) => {
             pPrice: "",
             pQuantity: "",
             pOffer: 0,
+            pSize: "",
             success: false,
             error: false,
           });
@@ -271,7 +274,25 @@ const AddProductDetail = ({ categories }) => {
             </div>
             <div className="flex space-x-1 py-4">
               <div className="w-1/2 flex flex-col space-y-1">
-                <label htmlFor="quantity">Produto em Stock *</label>
+                <label htmlFor="size">Tamanho</label>
+                <input
+                  value={fData.pSize}
+                  onChange={(e) =>
+                    setFdata({
+                      ...fData,
+                      error: false,
+                      success: false,
+                      pSize: e.target.value,
+                    })
+                  }
+                  type="text"
+                  className="px-4 py-2 border focus:outline-none"
+                  id="size"
+                  placeholder="Ex: 42, G, M, etc"
+                />
+              </div>
+              <div className="w-1/2 flex flex-col space-y-1">
+                <label htmlFor="quantity">Quantidade *</label>
                 <input
                   value={fData.pQuantity}
                   onChange={(e) =>
@@ -287,6 +308,8 @@ const AddProductDetail = ({ categories }) => {
                   id="quantity"
                 />
               </div>
+            </div>
+            <div className="flex space-x-1 py-4">
               <div className="w-1/2 flex flex-col space-y-1">
                 <label htmlFor="offer">Promoção do Produto (%) *</label>
                 <input

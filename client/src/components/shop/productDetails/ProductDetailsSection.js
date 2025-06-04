@@ -23,62 +23,56 @@ const ProductDetailsSection = () => {
   const [pImages, setPimages] = useState(null);
   const [count, setCount] = useState(0);
   const [quantitiy, setQuantitiy] = useState(1);
-  const [, setAlertq] = useState(false);
+  const [alertq, setAlertq] = useState(false);
   const [wList, setWlist] = useState(JSON.parse(localStorage.getItem("wishList")));
 
   const [storeProducts, setStoreProducts] = useState([]);
   const [loadingStores, setLoadingStores] = useState(true);
 
+  const fetchData = async () => {
+    dispatch({ type: "loading", payload: true });
+    try {
+      let responseData = await getSingleProduct(id);
+      if (responseData.Product) {
+        layoutDispatch({
+          type: "singleProductDetail",
+          payload: responseData.Product,
+        });
+        setPimages(responseData.Product.pImages);
+        layoutDispatch({ type: "inCart", payload: cartList() });
+      }
+    } catch (error) {
+      console.log(error);
+    } finally {
+      dispatch({ type: "loading", payload: false });
+    }
+
+    try {
+      let cartData = await cartListProduct();
+      if (cartData && cartData.Products) {
+        layoutDispatch({ type: "cartProduct", payload: cartData.Products });
+      }
+    } catch (error) {
+      console.log(error);
+    }
+
+    setLoadingStores(true);
+    try {
+      const storeData = await getStoreProducts(id);
+      if (storeData && storeData.stores) {
+        setStoreProducts(storeData.stores);
+      }
+    } catch(error) {
+      console.log(error);
+    } finally {
+      setLoadingStores(false);
+    }
+  };
+
   useEffect(() => {
-    // Função para buscar todos os dados necessários
-    const fetchData = async () => {
-      dispatch({ type: "loading", payload: true });
-
-      // Busca os detalhes do produto principal
-      try {
-        let responseData = await getSingleProduct(id);
-        if (responseData.Product) {
-          layoutDispatch({
-            type: "singleProductDetail",
-            payload: responseData.Product,
-          });
-          setPimages(responseData.Product.pImages);
-          layoutDispatch({ type: "inCart", payload: cartList() });
-        }
-      } catch (error) {
-        console.log(error);
-      } finally {
-        dispatch({ type: "loading", payload: false });
-      }
-
-      // Busca a lista de produtos no carrinho
-      try {
-        let cartData = await cartListProduct();
-        if (cartData && cartData.Products) {
-          layoutDispatch({ type: "cartProduct", payload: cartData.Products });
-        }
-      } catch (error) {
-        console.log(error);
-      }
-
-      // Busca as lojas para comparação de preço
-      setLoadingStores(true);
-      try {
-          const storeData = await getStoreProducts(id);
-          if (storeData && storeData.stores) {
-            setStoreProducts(storeData.stores);
-          }
-      } catch(error) {
-          console.log(error);
-      } finally {
-          setLoadingStores(false);
-      }
-    };
-
     fetchData();
   }, [id, dispatch, layoutDispatch]);
 
-  // Renderiza o estado de carregamento
   if (data.loading) {
     return (
       <div className="col-span-2 md:col-span-3 lg:col-span-4 flex items-center justify-center h-screen">
@@ -87,12 +81,10 @@ const ProductDetailsSection = () => {
     );
   }
 
-  // Renderiza se nenhum produto for encontrado
   if (!sProduct) {
     return <div className="m-12 text-center">Produto não encontrado.</div>;
   }
 
-  // Renderização principal do componente
   return (
     <Fragment>
       <Submenu
@@ -103,14 +95,14 @@ const ProductDetailsSection = () => {
         }}
       />
       <section className="m-4 md:mx-12 md:my-6">
-        <div className="grid grid-cols-2 md:grid-cols-12">
+        <div className="grid grid-cols-2 md:grid-cols-12 gap-6">
           {/* Coluna de Imagens Pequenas */}
-          <div className="hidden md:block md:col-span-1 md:flex md:flex-col md:space-y-4 md:mr-2">
+          <div className="hidden md:block md:col-span-2 md:flex md:flex-col md:space-y-4">
             {pImages && pImages.length > 0 && pImages.map((img, index) => (
                 <img
                     key={index}
-                    onClick={() => slideImage(null, index, count, setCount, pImages)}
-                    className={`${count === index ? "border-2 border-yellow-700" : "opacity-50"} cursor-pointer w-20 h-20 object-cover object-center`}
+                    onClick={() => setCount(index)}
+                    className={`${count === index ? "border-2 border-yellow-700" : "opacity-50"} cursor-pointer w-24 h-24 object-cover object-center rounded-lg hover:opacity-100 transition-opacity duration-200`}
                     src={`${apiURL}/uploads/products/${img}`}
                     alt="pic"
                 />
@@ -118,34 +110,130 @@ const ProductDetailsSection = () => {
           </div>
 
           {/* Imagem Principal */}
-          <div className="col-span-2 md:col-span-7">
-            <div className="relative">
+          <div className="col-span-2 md:col-span-6">
+            <div className="relative bg-white rounded-lg shadow-sm p-4">
               <img
-                className="w-full h-auto object-cover"
+                className="w-full h-[500px] object-contain"
                 src={`${apiURL}/uploads/products/${sProduct.pImages[count]}`}
                 alt="Product"
               />
-              {/* Controles do slide */}
             </div>
           </div>
 
           {/* Detalhes do Produto */}
           <div className="col-span-2 mt-8 md:mt-0 md:col-span-4 md:ml-6 lg:ml-12">
-             {/* ... O seu código de detalhes do produto (nome, preço, descrição, botões) pode continuar aqui ... */}
-             <div className="flex flex-col leading-8">
-                <div className="text-2xl tracking-wider">{sProduct.pName}</div>
-                <div className="flex justify-between items-center">
-                    <span className="text-xl tracking-wider text-yellow-700">
+             <div className="flex flex-col leading-8 bg-white rounded-lg shadow-sm p-6">
+                <div className="text-2xl font-medium tracking-wider">{sProduct.pName}</div>
+                {sProduct.pSize && (
+                    <div className="text-sm text-gray-600 mt-2">
+                        Tamanho: {sProduct.pSize}
+                    </div>
+                )}
+                <div className="flex justify-between items-center mt-4">
+                    <span className="text-2xl font-semibold tracking-wider text-yellow-700">
                         {sProduct.pPrice}Kz
                     </span>
-                    {/* Botão de Wishlist */}
+                    <div className="flex items-center">
+                        <button
+                            onClick={(e) => {
+                                if (isWish(sProduct._id, wList)) {
+                                    unWishReq(e, sProduct._id, setWlist);
+                                } else {
+                                    isWishReq(e, sProduct._id, setWlist);
+                                }
+                            }}
+                            className="text-gray-400 hover:text-yellow-700 focus:outline-none"
+                        >
+                            <svg
+                                className={`w-6 h-6 ${
+                                    isWish(sProduct._id, wList)
+                                        ? "text-yellow-700"
+                                        : "text-gray-400"
+                                }`}
+                                fill="currentColor"
+                                viewBox="0 0 20 20"
+                                xmlns="http://www.w3.org/2000/svg"
+                            >
+                                <path
+                                    fillRule="evenodd"
+                                    d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z"
+                                    clipRule="evenodd"
+                                />
+                            </svg>
+                        </button>
+                    </div>
                 </div>
+                <div className="my-6 text-gray-600 border-t border-gray-100 pt-4">
+                    {sProduct.pDescription}
+                </div>
+
+                {/* Controles de Quantidade */}
+                <div className="flex items-center space-x-4 mb-6">
+                    <span className="text-gray-600">Quantidade:</span>
+                    <div className="flex items-center border border-gray-300 rounded">
+                        <button
+                            onClick={() =>
+                                updateQuantity(
+                                    "decrease",
+                                    sProduct.pQuantity,
+                                    quantitiy,
+                                    setQuantitiy,
+                                    setAlertq
+                                )
+                            }
+                            className="px-3 py-1 text-gray-600 hover:bg-gray-100"
+                        >
+                            -
+                        </button>
+                        <span className="px-4 py-1 text-gray-700">{quantitiy}</span>
+                        <button
+                            onClick={() =>
+                                updateQuantity(
+                                    "increase",
+                                    sProduct.pQuantity,
+                                    quantitiy,
+                                    setQuantitiy,
+                                    setAlertq
+                                )
+                            }
+                            className="px-3 py-1 text-gray-600 hover:bg-gray-100"
+                        >
+                            +
+                        </button>
+                    </div>
+                </div>
+
+                {/* Alerta de quantidade */}
+                {alertq && (
+                    <div className="mb-4 text-red-500 text-sm">
+                        Quantidade máxima disponível atingida
+                    </div>
+                )}
+
+                {/* Botão Adicionar ao Carrinho */}
+                <button
+                    onClick={() =>
+                        addToCart(
+                            sProduct._id,
+                            quantitiy,
+                            sProduct.pPrice,
+                            layoutDispatch,
+                            setQuantitiy,
+                            setAlertq,
+                            fetchData,
+                            totalCost
+                        )
+                    }
+                    disabled={sProduct.pQuantity === 0}
+                    className={`w-full py-3 px-4 rounded-lg text-white font-medium ${
+                        sProduct.pQuantity === 0
+                            ? "bg-gray-400 cursor-not-allowed"
+                            : "bg-yellow-700 hover:bg-yellow-800"
+                    }`}
+                >
+                    {sProduct.pQuantity === 0 ? "Fora de Estoque" : "Adicionar ao Carrinho"}
+                </button>
              </div>
-             <div className="my-4 md:my-6 text-gray-600">
-                {sProduct.pDescription}
-             </div>
-             {/* Botões de quantidade e "Adicionar ao Carrinho" */}
-             {/* ... */}
           </div>
         </div>
       </section>

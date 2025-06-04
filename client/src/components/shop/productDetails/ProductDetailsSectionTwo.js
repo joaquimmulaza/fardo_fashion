@@ -86,6 +86,15 @@ const ProductDetailsSectionTwo = (props) => {
             {singleProduct.pCategory ? singleProduct.pCategory.cName : ""}
           </span>
         </div>
+        {singleProduct.pSize && (
+          <div>
+            <span>Tamanho :</span>
+            <span className="text-sm text-gray-600">
+              {" "}
+              {singleProduct.pSize}
+            </span>
+          </div>
+        )}
       </div>
     </Fragment>
   );
