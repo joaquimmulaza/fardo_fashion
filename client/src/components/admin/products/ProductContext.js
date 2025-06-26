@@ -13,6 +13,8 @@ export const productState = {
     pPrice: "",
     pOffer: "",
     pSize: "",
+    pColor: "",
+    pBrand: "",
   },
 };
 
@@ -46,6 +48,8 @@ export const productReducer = (state, action) => {
           pPrice: action.product.pPrice,
           pOffer: action.product.pOffer,
           pSize: action.product.pSize,
+          pColor: action.product.pColor,
+          pBrand: action.product.pBrand,
         },
       };
     case "editProductModalClose":
@@ -63,6 +67,8 @@ export const productReducer = (state, action) => {
           pPrice: "",
           pOffer: "",
           pSize: "",
+          pColor: "",
+          pBrand: "",
         },
       };
     default:

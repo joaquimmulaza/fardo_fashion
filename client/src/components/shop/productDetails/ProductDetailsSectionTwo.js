@@ -95,6 +95,24 @@ const ProductDetailsSectionTwo = (props) => {
             </span>
           </div>
         )}
+        {singleProduct.pColor && (
+          <div>
+            <span>Cor :</span>
+            <span className="text-sm text-gray-600">
+              {" "}
+              {singleProduct.pColor}
+            </span>
+          </div>
+        )}
+        {singleProduct.pBrand && (
+          <div>
+            <span>Marca :</span>
+            <span className="text-sm text-gray-600">
+              {" "}
+              {singleProduct.pBrand}
+            </span>
+          </div>
+        )}
       </div>
     </Fragment>
   );

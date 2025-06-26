@@ -98,13 +98,17 @@ const CategoryTable = ({ order, editOrder }) => {
           {order.allProduct.map((product, i) => {
             return (
               <span className="block flex items-center space-x-2" key={i}>
-                <img
-                  className="w-8 h-8 object-cover object-center"
-                  src={`${apiURL}/uploads/products/${product.id.pImages[0]}`}
-                  alt="productImage"
-                />
-                <span>{product.id.pName}</span>
-                <span>{product.quantitiy}x</span>
+                {product.id && product.id.pImages && product.id.pImages[0] ? (
+                  <img
+                    className="w-8 h-8 object-cover object-center"
+                    src={`${apiURL}/uploads/products/${product.id.pImages[0]}`}
+                    alt="productImage"
+                  />
+                ) : (
+                  <div className="w-8 h-8 bg-gray-200"></div>
+                )}
+                <span>{product.id ? product.id.pName : 'Product not found'}</span>
+                <span>{product.quantity}x</span>
               </span>
             );
           })}

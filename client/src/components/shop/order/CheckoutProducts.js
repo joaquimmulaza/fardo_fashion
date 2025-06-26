@@ -40,10 +40,13 @@ export const CheckoutComponent = (props) => {
     dispatch({ type: "loading", payload: true });
 
     try {
+      // Obter o total correto do carrinho
+      const cartTotal = totalCost();
+      
       let orderData = {
         allProduct: JSON.parse(localStorage.getItem("cart")),
         user: JSON.parse(localStorage.getItem("jwt")).user._id,
-        amount: totalCost(),
+        amount: cartTotal,
         paymentMethod: state.paymentMethod,
         address: state.address,
         phone: state.phone,
@@ -195,7 +198,7 @@ export const CheckoutComponent = (props) => {
                 className="w-full px-4 py-2 text-center text-white font-semibold cursor-pointer mt-4"
                 style={{ background: "#303031" }}
               >
-                Finalizar Pedido
+                Finalizar Pedido - Total: {totalCost()}Kz
               </div>
             </div>
           </div>
@@ -208,11 +211,41 @@ export const CheckoutComponent = (props) => {
 const CheckoutProducts = ({ products }) => {
   const history = useHistory();
 
+  // Função para extrair informações da loja do ID do produto
+  const getStoreInfo = (productId) => {
+    if (productId.includes('_store_')) {
+      const parts = productId.split('_store_');
+      return {
+        isFromStore: true,
+        storeId: parts[1]
+      };
+    }
+    return {
+      isFromStore: false,
+      storeId: null
+    };
+  };
+
+  // Função para obter o preço correto do produto
+  const getProductPrice = (productId) => {
+    let carts = JSON.parse(localStorage.getItem("cart"));
+    if (carts) {
+      const cartItem = carts.find(item => item.id === productId);
+      if (cartItem) {
+        return cartItem.price;
+      }
+    }
+    return 0;
+  };
+
   return (
     <Fragment>
       <div className="grid grid-cols-2 md:grid-cols-1">
         {products !== null && products.length > 0 ? (
           products.map((product, index) => {
+            const storeInfo = getStoreInfo(product._id);
+            const productPrice = getProductPrice(product._id);
+            
             return (
               <div
                 key={index}
@@ -220,22 +253,33 @@ const CheckoutProducts = ({ products }) => {
               >
                 <div className="md:flex md:items-center md:space-x-4">
                   <img
-                    onClick={(e) => history.push(`/products/${product._id}`)}
+                    onClick={(e) => {
+                      // Extrair o ID original do produto para navegação
+                      const originalProductId = product._id.includes('_store_') 
+                        ? product._id.split('_store_')[0] 
+                        : product._id;
+                      history.push(`/products/${originalProductId}`);
+                    }}
                     className="cursor-pointer md:h-20 md:w-20 object-cover object-center"
                     src={`${apiURL}/uploads/products/${product.pImages[0]}`}
                     alt="wishListproduct"
                   />
                   <div className="text-lg md:ml-6 truncate">
                     {product.pName}
+                    {storeInfo.isFromStore && (
+                      <div className="text-xs text-yellow-600 bg-yellow-100 px-1 rounded mt-1">
+                        Produto de loja parceira
+                      </div>
+                    )}
                   </div>
                   <div className="md:ml-6 font-semibold text-gray-600 text-sm">
-                    Preço : {product.pPrice}Kz{" "}
+                    Preço : {productPrice}Kz{" "}
                   </div>
                   <div className="md:ml-6 font-semibold text-gray-600 text-sm">
                     Quantidade : {quantity(product._id)}
                   </div>
                   <div className="font-semibold text-gray-600 text-sm">
-                    Subtotal : {subTotal(product._id, product.pPrice)}Kz
+                    Subtotal : {subTotal(product._id)}Kz
                   </div>
                 </div>
               </div>

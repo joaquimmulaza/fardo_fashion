@@ -20,32 +20,7 @@ export const createPorductImage = async ({ pImage }) => {
   /* Most important part for uploading multiple image  */
 };
 
-export const createProduct = async ({
-  pName,
-  pDescription,
-  pImage,
-  pStatus,
-  pCategory,
-  pQuantity,
-  pPrice,
-  pOffer,
-  pSize,
-}) => {
-  /* Most important part for uploading multiple image  */
-  let formData = new FormData();
-  for (const file of pImage) {
-    formData.append("pImage", file);
-  }
-  /* Most important part for uploading multiple image  */
-  formData.append("pName", pName);
-  formData.append("pDescription", pDescription);
-  formData.append("pStatus", pStatus);
-  formData.append("pCategory", pCategory);
-  formData.append("pQuantity", pQuantity);
-  formData.append("pPrice", pPrice);
-  formData.append("pOffer", pOffer);
-  formData.append("pSize", pSize);
-
+export const createProduct = async (formData) => {
   try {
     let res = await axios.post(`${apiURL}/api/product/add-product`, formData);
     return res.data;
@@ -54,27 +29,7 @@ export const createProduct = async ({
   }
 };
 
-export const editProduct = async (product) => {
-  console.log(product);
-  /* Most important part for updating multiple image  */
-  let formData = new FormData();
-  if (product.pEditImages) {
-    for (const file of product.pEditImages) {
-      formData.append("pEditImages", file);
-    }
-  }
-  /* Most important part for updating multiple image  */
-  formData.append("pId", product.pId);
-  formData.append("pName", product.pName);
-  formData.append("pDescription", product.pDescription);
-  formData.append("pStatus", product.pStatus);
-  formData.append("pCategory", product.pCategory._id);
-  formData.append("pQuantity", product.pQuantity);
-  formData.append("pPrice", product.pPrice);
-  formData.append("pOffer", product.pOffer);
-  formData.append("pImages", product.pImages);
-  formData.append("pSize", product.pSize);
-
+export const editProduct = async (formData) => {
   try {
     let res = await axios.post(`${apiURL}/api/product/edit-product`, formData);
     return res.data;

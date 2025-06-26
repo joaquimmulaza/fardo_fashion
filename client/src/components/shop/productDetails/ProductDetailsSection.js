@@ -1,4 +1,4 @@
-import React, { Fragment, useState, useEffect, useContext } from "react";
+import React, { Fragment, useState, useEffect, useContext, useCallback } from "react";
 import { useParams } from "react-router-dom";
 import { ProductDetailsContext } from "./index";
 import { LayoutContext } from "../layout";
@@ -28,8 +28,41 @@ const ProductDetailsSection = () => {
 
   const [storeProducts, setStoreProducts] = useState([]);
   const [loadingStores, setLoadingStores] = useState(true);
+  const [selectedStore, setSelectedStore] = useState(null);
 
-  const fetchData = async () => {
+  // Função para obter o preço atual baseado na seleção
+  const getCurrentPrice = () => {
+    if (selectedStore) {
+      return selectedStore.price;
+    }
+    return sProduct ? sProduct.pPrice : 0;
+  };
+
+  // Função para obter o estoque atual baseado na seleção
+  const getCurrentStock = () => {
+    if (selectedStore) {
+      return selectedStore.stock;
+    }
+    return sProduct ? sProduct.pQuantity : 0;
+  };
+
+  // Função para obter o ID do produto para o carrinho
+  const getProductIdForCart = () => {
+    if (selectedStore) {
+      // Se uma loja está selecionada, usamos um ID composto
+      return `${sProduct._id}_store_${selectedStore._id}`;
+    }
+    return sProduct._id;
+  };
+
+  // Função para lidar com a seleção de loja
+  const handleStoreSelect = (store) => {
+    setSelectedStore(store);
+    setQuantitiy(1); // Reset quantidade quando mudar de loja
+    setAlertq(false);
+  };
+
+  const fetchData = useCallback(async () => {
     dispatch({ type: "loading", payload: true });
     try {
       let responseData = await getSingleProduct(id);
@@ -67,11 +100,11 @@ const ProductDetailsSection = () => {
     } finally {
       setLoadingStores(false);
     }
-  };
+  }, [id, dispatch, layoutDispatch]);
 
   useEffect(() => {
     fetchData();
-  }, [id, dispatch, layoutDispatch]);
+  }, [fetchData]);
 
   if (data.loading) {
     return (
@@ -129,9 +162,29 @@ const ProductDetailsSection = () => {
                         Tamanho: {sProduct.pSize}
                     </div>
                 )}
+                {sProduct.pColor && (
+                    <div className="text-sm text-gray-600 mt-2">
+                        Cor: {sProduct.pColor}
+                    </div>
+                )}
+                {sProduct.pBrand && (
+                    <div className="text-sm text-gray-600 mt-2">
+                        Marca: {sProduct.pBrand}
+                    </div>
+                )}
+                
+                {/* Indicador de loja selecionada */}
+                {selectedStore && (
+                    <div className="mt-2 p-2 bg-yellow-50 border border-yellow-200 rounded">
+                        <span className="text-sm text-yellow-800">
+                            Produto selecionado da loja: <strong>{selectedStore.name}</strong>
+                        </span>
+                    </div>
+                )}
+                
                 <div className="flex justify-between items-center mt-4">
                     <span className="text-2xl font-semibold tracking-wider text-yellow-700">
-                        {sProduct.pPrice}Kz
+                        {getCurrentPrice()}Kz
                     </span>
                     <div className="flex items-center">
                         <button
@@ -175,7 +228,7 @@ const ProductDetailsSection = () => {
                             onClick={() =>
                                 updateQuantity(
                                     "decrease",
-                                    sProduct.pQuantity,
+                                    getCurrentStock(),
                                     quantitiy,
                                     setQuantitiy,
                                     setAlertq
@@ -190,7 +243,7 @@ const ProductDetailsSection = () => {
                             onClick={() =>
                                 updateQuantity(
                                     "increase",
-                                    sProduct.pQuantity,
+                                    getCurrentStock(),
                                     quantitiy,
                                     setQuantitiy,
                                     setAlertq
@@ -214,9 +267,9 @@ const ProductDetailsSection = () => {
                 <button
                     onClick={() =>
                         addToCart(
-                            sProduct._id,
+                            getProductIdForCart(),
                             quantitiy,
-                            sProduct.pPrice,
+                            getCurrentPrice(),
                             layoutDispatch,
                             setQuantitiy,
                             setAlertq,
@@ -224,14 +277,14 @@ const ProductDetailsSection = () => {
                             totalCost
                         )
                     }
-                    disabled={sProduct.pQuantity === 0}
+                    disabled={getCurrentStock() === 0}
                     className={`w-full py-3 px-4 rounded-lg text-white font-medium ${
-                        sProduct.pQuantity === 0
+                        getCurrentStock() === 0
                             ? "bg-gray-400 cursor-not-allowed"
                             : "bg-yellow-700 hover:bg-yellow-800"
                     }`}
                 >
-                    {sProduct.pQuantity === 0 ? "Fora de Estoque" : "Adicionar ao Carrinho"}
+                    {getCurrentStock() === 0 ? "Fora de Estoque" : "Adicionar ao Carrinho"}
                 </button>
              </div>
           </div>
@@ -240,7 +293,12 @@ const ProductDetailsSection = () => {
 
       {/* Tabela de Comparação de Preços */}
       <div className="mx-4 md:mx-12">
-        <PriceComparison stores={storeProducts} loading={loadingStores} />
+        <PriceComparison 
+          stores={storeProducts} 
+          loading={loadingStores} 
+          selectedStore={selectedStore}
+          onStoreSelect={handleStoreSelect}
+        />
       </div>
 
       {/* Seção de detalhes adicionais */}

@@ -81,7 +81,7 @@ const Navber = (props) => {
             style={{ letterSpacing: "0.70rem" }}
             className="hidden lg:block flex items-left col-span-1 text-center text-gray-800 font-bold tracking-widest uppercase text-2xl cursor-pointer"
           >
-            Fardo Fashion
+             Fashion
           </div>
           <div className="flex items-right col-span-2 lg:col-span-1 flex justify-end">
             {/*  WishList Page Button */}
@@ -254,7 +254,7 @@ const Navber = (props) => {
                     ) : (
                       <Fragment>
                         <li className="flex flex-col text-gray-700 w-48 shadow-lg">
-                          <span
+                          {/* <span
                             onClick={(e) => history.push("/admin/dashboard")}
                             className="flex space-x-2 py-2 px-8 hover:bg-gray-400 cursor-pointer"
                           >
@@ -281,7 +281,7 @@ const Navber = (props) => {
                               </svg>
                             </span>
                             <span>Admin Panel</span>
-                          </span>
+                          </span> */}
                           <span
                             onClick={(e) => logout()}
                             className="flex space-x-2 py-2 px-8 hover:bg-gray-400 cursor-pointer"

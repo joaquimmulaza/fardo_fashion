@@ -20,6 +20,8 @@ const EditProductModal = (props) => {
     pPrice: "",
     pOffer: "",
     pSize: "",
+    pColor: "",
+    pBrand: "",
     error: false,
     success: false,
   });
@@ -52,6 +54,8 @@ const EditProductModal = (props) => {
         pPrice: data.editProductModal.pPrice || "",
         pOffer: data.editProductModal.pOffer || "",
         pSize: data.editProductModal.pSize || "",
+        pColor: data.editProductModal.pColor || "",
+        pBrand: data.editProductModal.pBrand || "",
       });
     }
   }, [data.editProductModal]);
@@ -73,7 +77,27 @@ const EditProductModal = (props) => {
   const submitForm = async (e) => {
     e.preventDefault();
     try {
-      let responseData = await editProduct(editformData);
+      let formData = new FormData();
+      formData.append("pId", editformData.pId);
+      formData.append("pName", editformData.pName);
+      formData.append("pDescription", editformData.pDescription);
+      formData.append("pPrice", editformData.pPrice);
+      formData.append("pQuantity", editformData.pQuantity);
+      formData.append("pCategory", editformData.pCategory._id || editformData.pCategory);
+      formData.append("pOffer", editformData.pOffer);
+      formData.append("pStatus", editformData.pStatus);
+      formData.append("pSize", editformData.pSize);
+      formData.append("pColor", editformData.pColor);
+      formData.append("pBrand", editformData.pBrand);
+      formData.append("pImages", editformData.pImages);
+
+      if (editformData.pEditImages && editformData.pEditImages.length > 0) {
+        for (let i = 0; i < editformData.pEditImages.length; i++) {
+          formData.append("pImage", editformData.pEditImages[i]);
+        }
+      }
+
+      let responseData = await editProduct(formData);
       if (responseData.success) {
         fetchData();
         setEditformdata({ ...editformData, success: responseData.success });
@@ -94,7 +118,7 @@ const EditProductModal = (props) => {
       }
     } catch (error) {
       console.error("Error submitting form:", error);
-      setEditformdata({ ...editformData, error: "Error updating product" });
+      setEditformdata({ ...editformData, error: "Erro ao atualizar produto" });
     }
   };
 
@@ -115,11 +139,10 @@ const EditProductModal = (props) => {
       />
 
       {/* Modal Start */}
-      <div className="fixed inset-0 flex items-center z-30 justify-center overflow-auto">
-        <div className="mt-32 md:mt-0 relative bg-white w-11/12 md:w-3/6 shadow-lg flex flex-col items-center space-y-4 px-4 py-4 md:px-8">
-          <div className="flex items-center justify-between w-full pt-4">
+      <div className="fixed inset-0 flex items-center justify-center z-30 px-2 py-6 overflow-y-auto">
+        <div className="relative bg-white w-11/12 md:w-3/6 max-h-screen overflow-y-auto shadow-lg flex flex-col items-center space-y-4 px-4 py-4 md:px-8">          <div className="flex items-center justify-between w-full pt-4">
             <span className="text-left font-semibold text-2xl tracking-wider">
-              Edit Product
+              Editar Produto
             </span>
             {/* Close Modal */}
             <span
@@ -294,6 +317,44 @@ const EditProductModal = (props) => {
                   className="px-4 py-2 border focus:outline-none"
                   id="size"
                   placeholder="Ex: 42, G, M, etc"
+                />
+              </div>
+              <div className="w-1/2 flex flex-col space-y-1">
+                <label htmlFor="color">Cor</label>
+                <input
+                  value={editformData.pColor}
+                  onChange={(e) =>
+                    setEditformdata({
+                      ...editformData,
+                      error: false,
+                      success: false,
+                      pColor: e.target.value,
+                    })
+                  }
+                  type="text"
+                  className="px-4 py-2 border focus:outline-none"
+                  id="color"
+                  placeholder="Ex: Preto, Azul, etc"
+                />
+              </div>
+            </div>
+            <div className="flex space-x-1 py-4">
+              <div className="w-1/2 flex flex-col space-y-1">
+                <label htmlFor="brand">Marca</label>
+                <input
+                  value={editformData.pBrand}
+                  onChange={(e) =>
+                    setEditformdata({
+                      ...editformData,
+                      error: false,
+                      success: false,
+                      pBrand: e.target.value,
+                    })
+                  }
+                  type="text"
+                  className="px-4 py-2 border focus:outline-none"
+                  id="brand"
+                  placeholder="Ex: Nike, Adidas, etc"
                 />
               </div>
               <div className="w-1/2 flex flex-col space-y-1">

@@ -1,0 +1,28 @@
+/* Contact Us Page Styles */
+.contact-form input,
+.contact-form textarea {
+  transition: all 0.3s ease;
+}
+
+.contact-form input:focus,
+.contact-form textarea:focus {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}
+
+/* Animation for form submission */
+@keyframes submitAnimation {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.05);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+.submit-button:active {
+  animation: submitAnimation 0.3s ease;
+} 

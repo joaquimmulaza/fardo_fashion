@@ -25,11 +25,27 @@ const TableHeader = () => {
 };
 
 const TableBody = ({ order }) => {
+  // Função para extrair informações da loja do ID do produto
+  const getStoreInfo = (productId) => {
+    if (productId.includes('_store_')) {
+      const parts = productId.split('_store_');
+      return {
+        isFromStore: true,
+        storeId: parts[1]
+      };
+    }
+    return {
+      isFromStore: false,
+      storeId: null
+    };
+  };
+
   return (
     <Fragment>
       <tr className="border-b">
         <td className="w-48 hover:bg-gray-200 p-2 flex flex-col space-y-1">
           {order.allProduct.map((product, i) => {
+            const storeInfo = getStoreInfo(product.id._id);
             return (
               <span className="block flex items-center space-x-2" key={i}>
                 <img
@@ -39,6 +55,11 @@ const TableBody = ({ order }) => {
                 />
                 <span>{product.id.pName}</span>
                 <span>{product.quantitiy}x</span>
+                {storeInfo.isFromStore && (
+                  <span className="text-xs text-yellow-600 bg-yellow-100 px-1 rounded">
+                    Loja parceira
+                  </span>
+                )}
               </span>
             );
           })}

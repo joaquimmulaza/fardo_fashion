@@ -27,6 +27,14 @@ const productSchema = new mongoose.Schema(
       type: String,
       required: false,
     },
+    pColor: {
+      type: String,
+      required: false,
+    },
+    pBrand: {
+      type: String,
+      required: false,
+    },
     pCategory: {
       type: ObjectId,
       ref: "categories",

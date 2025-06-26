@@ -42,7 +42,7 @@ class Product {
   }
 
   async postAddProduct(req, res) {
-    let { pName, pDescription, pPrice, pQuantity, pCategory, pOffer, pStatus, pSize } =
+    let { pName, pDescription, pPrice, pQuantity, pCategory, pOffer, pStatus, pSize, pColor, pBrand } =
       req.body;
     let images = req.files;
     // Validation
@@ -53,8 +53,7 @@ class Product {
       !pQuantity |
       !pCategory |
       !pOffer |
-      !pStatus |
-      !pSize
+      !pStatus
     ) {
       Product.deleteImages(images, "file");
       return res.json({ error: "All filled must be required" });
@@ -86,6 +85,8 @@ class Product {
           pOffer,
           pStatus,
           pSize,
+          pColor,
+          pBrand,
         });
         let save = await newProduct.save();
         if (save) {
@@ -109,20 +110,21 @@ class Product {
       pStatus,
       pImages,
       pSize,
+      pColor,
+      pBrand,
     } = req.body;
     let editImages = req.files;
 
     // Validate other fileds
     if (
-      !pId |
-      !pName |
-      !pDescription |
-      !pPrice |
-      !pQuantity |
-      !pCategory |
-      !pOffer |
-      !pStatus |
-      !pSize
+      !pId ||
+      !pName ||
+      !pDescription ||
+      !pPrice ||
+      !pQuantity ||
+      !pCategory ||
+      !pOffer ||
+      !pStatus
     ) {
       return res.json({ error: "Todos devem ser preechido" });
     }
@@ -137,32 +139,45 @@ class Product {
       Product.deleteImages(editImages, "file");
       return res.json({ error: "Precisa de pelo menos 2 imagens" });
     } else {
-      let editData = {
-        pName,
-        pDescription,
-        pPrice,
-        pQuantity,
-        pCategory,
-        pOffer,
-        pStatus,
-        pSize,
-      };
-      if (editImages.length == 2) {
-        let allEditImages = [];
-        for (const img of editImages) {
-          allEditImages.push(img.filename);
-        }
-        editData = { ...editData, pImages: allEditImages };
-        Product.deleteImages(pImages.split(","), "string");
-      }
       try {
-        let editProduct = productModel.findByIdAndUpdate(pId, editData);
-        editProduct.exec((err) => {
-          if (err) console.log(err);
+        let editData = {
+          pName,
+          pDescription,
+          pPrice,
+          pQuantity,
+          pCategory,
+          pOffer,
+          pStatus,
+          pSize,
+          pColor,
+          pBrand,
+        };
+
+        if (editImages && editImages.length == 2) {
+          let allEditImages = [];
+          for (const img of editImages) {
+            allEditImages.push(img.filename);
+          }
+          editData.pImages = allEditImages;
+          if (pImages) {
+            Product.deleteImages(pImages.split(","), "string");
+          }
+        }
+
+        let editProduct = await productModel.findByIdAndUpdate(
+          pId,
+          { $set: editData },
+          { new: true, runValidators: true }
+        );
+
+        if (editProduct) {
           return res.json({ success: "Produto editado com sucesso" });
-        });
+        } else {
+          return res.json({ error: "Produto não encontrado" });
+        }
       } catch (err) {
         console.log(err);
+        return res.json({ error: "Erro ao editar produto" });
       }
     }
   }

@@ -40,17 +40,44 @@ const CartModal = () => {
       ? JSON.parse(localStorage.getItem("cart"))
       : [];
     if (cart.length !== 0) {
+      // Remove o produto específico do carrinho
       cart = cart.filter((item) => item.id !== id);
       localStorage.setItem("cart", JSON.stringify(cart));
-      fetchData();
+      
+      // Atualiza o estado
       dispatch({ type: "inCart", payload: cartList() });
       dispatch({ type: "cartTotalCost", payload: totalCost() });
+      
+      // Se o carrinho ficou vazio, limpa os produtos
+      if (cart.length === 0) {
+        dispatch({ type: "cartProduct", payload: null });
+      } else {
+        // Recarrega os dados do carrinho
+        fetchData();
+      }
     }
-    if (cart.length === 0) {
-      dispatch({ type: "cartProduct", payload: null });
-      fetchData();
-      dispatch({ type: "inCart", payload: cartList() });
+  };
+
+  const clearCart = () => {
+    localStorage.setItem("cart", JSON.stringify([]));
+    dispatch({ type: "cartProduct", payload: null });
+    dispatch({ type: "inCart", payload: null });
+    dispatch({ type: "cartTotalCost", payload: null });
+  };
+
+  // Função para extrair informações da loja do ID do produto
+  const getStoreInfo = (productId) => {
+    if (productId.includes('_store_')) {
+      const parts = productId.split('_store_');
+      return {
+        isFromStore: true,
+        storeId: parts[1]
+      };
     }
+    return {
+      isFromStore: false,
+      storeId: null
+    };
   };
 
   return (
@@ -95,6 +122,7 @@ const CartModal = () => {
               {products &&
                 products.length !== 0 &&
                 products.map((item, index) => {
+                  const storeInfo = getStoreInfo(item._id);
                   return (
                     <Fragment key={index}>
                       {/* Cart Product Start */}
@@ -106,6 +134,14 @@ const CartModal = () => {
                         />
                         <div className="relative w-full flex flex-col">
                           <div className="my-2">{item.pName}</div>
+                          
+                          {/* Indicador de loja se aplicável */}
+                          {storeInfo.isFromStore && (
+                            <div className="text-xs text-yellow-400 mb-1">
+                              Produto de loja parceira
+                            </div>
+                          )}
+                          
                           <div className="flex items-center justify-between">
                             <div className="flex items-center justify-between space-x-2">
                               <div className="text-sm text-gray-400">
@@ -122,7 +158,7 @@ const CartModal = () => {
                               <span className="text-sm text-gray-400">
                               Subtotal :
                               </span>{" "}
-                              {subTotal(item._id, item.pPrice)}Kz
+                              {subTotal(item._id)}Kz
                             </div>{" "}
                             {/* SUbtotal Count */}
                           </div>
@@ -165,7 +201,17 @@ const CartModal = () => {
             >
               Continuar as compras
             </div>
-            {data.cartTotalCost ? (
+            
+            {products && products.length > 0 && (
+              <div
+                onClick={clearCart}
+                className="cursor-pointer px-4 py-2 border border-red-400 text-red-400 text-center cursor-pointer hover:bg-red-400 hover:text-white"
+              >
+                Limpar Carrinho
+              </div>
+            )}
+            
+            {data.cartTotalCost && data.cartTotalCost > 0 ? (
               <Fragment>
                 {isAuthenticate() ? (
                   <div
@@ -193,7 +239,7 @@ const CartModal = () => {
                       });
                     }}
                   >
-                    Finalizar Compra {data.cartTotalCost}
+                    Finalizar Compra {data.cartTotalCost}Kz
                   </div>
                 )}
               </Fragment>
