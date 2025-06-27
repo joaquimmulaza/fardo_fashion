@@ -28,3 +28,13 @@ export const signupReq = async ({ name, email, password, cPassword }) => {
     console.log(error);
   }
 };
+
+export const partnerSignupReq = async ({ name, storeName, email, password, cPassword }) => {
+  const data = { name, storeName, email, password, cPassword };
+  try {
+    let res = await axios.post(`${apiURL}/api/stores/partner-signup`, data);
+    return res.data;
+  } catch (error) {
+    console.log(error);
+  }
+};

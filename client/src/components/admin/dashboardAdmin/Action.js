@@ -136,6 +136,38 @@ export const updateStore = async (storeId, name, dispatch) => {
   }
 };
 
+export const approvePartner = async (storeId, dispatch) => {
+  try {
+    let responseData = await updateStoreApi(storeId + '/approve');
+    if (responseData && responseData.success) {
+      dispatch({ type: "storeApproveSuccess", payload: responseData.success });
+      await fetchStores(dispatch);
+    } else if (responseData && responseData.error) {
+      dispatch({ type: "storeApproveError", payload: responseData.error });
+    }
+    return responseData;
+  } catch (error) {
+    console.error("Error approving partner:", error);
+    throw error;
+  }
+};
+
+export const denyPartner = async (storeId, dispatch) => {
+  try {
+    let responseData = await updateStoreApi(storeId + '/deny');
+    if (responseData && responseData.success) {
+      dispatch({ type: "storeDenySuccess", payload: responseData.success });
+      await fetchStores(dispatch);
+    } else if (responseData && responseData.error) {
+      dispatch({ type: "storeDenyError", payload: responseData.error });
+    }
+    return responseData;
+  } catch (error) {
+    console.error("Error denying partner:", error);
+    throw error;
+  }
+};
+
 // ASSOCIAÇÃO LOJA-PRODUTO
 export const fetchStoreProducts = async (productId, dispatch) => {
   try {

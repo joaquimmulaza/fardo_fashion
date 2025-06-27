@@ -189,3 +189,31 @@ export const updateStoreProduct = async (storeId, productId, data) => {
     throw error;
   }
 };
+
+export const approvePartner = async (storeId) => {
+  try {
+    const response = await axios.put(`${apiURL}/api/stores/${storeId}/approve`);
+    return response.data;
+  } catch (error) {
+    console.error("Error in approvePartner API call:", error);
+    if (error.response) {
+      console.error("Error response data:", error.response.data);
+      console.error("Error response status:", error.response.status);
+    }
+    throw error;
+  }
+};
+
+export const denyPartner = async (storeId) => {
+  try {
+    const response = await axios.put(`${apiURL}/api/stores/${storeId}/deny`);
+    return response.data;
+  } catch (error) {
+    console.error("Error in denyPartner API call:", error);
+    if (error.response) {
+      console.error("Error response data:", error.response.data);
+      console.error("Error response status:", error.response.status);
+    }
+    throw error;
+  }
+};

@@ -2,6 +2,8 @@ const storeModel = require("../models/storeModel");
 const storeProductModel = require("../models/storeProductModel");
 const productModel = require("../models/products");
 const mongoose = require("mongoose");
+const bcrypt = require("bcryptjs");
+const nodemailer = require("nodemailer");
 
 class StoreController {
   async createStore(req, res) {
@@ -299,6 +301,111 @@ class StoreController {
     } catch (err) {
       console.error("Error in updateStoreProduct:", err);
       return res.status(500).json({ error: "Erro ao atualizar associação." });
+    }
+  }
+
+  async partnerSignup(req, res) {
+    const { name, storeName, email, password, cPassword } = req.body;
+    if (!name || !storeName || !email || !password || !cPassword) {
+      return res.status(400).json({ error: "Todos os campos são obrigatórios." });
+    }
+    if (password !== cPassword) {
+      return res.status(400).json({ error: "As senhas não coincidem." });
+    }
+    try {
+      const existingStore = await storeModel.findOne({ name: storeName });
+      if (existingStore) {
+        return res.status(409).json({ error: "Já existe uma loja com esse nome." });
+      }
+      const existingEmail = await storeModel.findOne({ email });
+      if (existingEmail) {
+        return res.status(409).json({ error: "Já existe um parceiro com esse email." });
+      }
+      const hashedPassword = await bcrypt.hash(password, 10);
+      const newStore = new storeModel({
+        name: storeName,
+        ownerName: name,
+        email,
+        password: hashedPassword,
+        approved: false,
+        pending: true,
+        userType: "partner",
+      });
+      await newStore.save();
+      return res.json({ success: "Solicitação enviada! Aguarde aprovação do admin." });
+    } catch (err) {
+      console.log(err);
+      return res.status(500).json({ error: "Erro ao cadastrar parceiro." });
+    }
+  }
+
+  async approvePartner(req, res) {
+    const { storeId } = req.params;
+    try {
+      const store = await storeModel.findById(storeId);
+      if (!store) return res.status(404).json({ error: "Loja/parceiro não encontrado." });
+      store.approved = true;
+      store.pending = false;
+      await store.save();
+      // Enviar email de confirmação
+      const transporter = nodemailer.createTransport({
+        service: 'gmail',
+        auth: {
+          user: process.env.EMAIL_USER, // configure no .env
+          pass: process.env.EMAIL_PASS, // configure no .env
+        },
+      });
+      const mailOptions = {
+        from: process.env.EMAIL_USER,
+        to: store.email,
+        subject: 'Sua solicitação de parceria foi aprovada!',
+        text: `Olá ${store.ownerName},\n\nSua solicitação para ser parceiro da Fardo Fashion foi aprovada!\n\nAgora você pode acessar sua conta normalmente.\n\nAtenciosamente,\nEquipe Fardo Fashion`,
+      };
+      transporter.sendMail(mailOptions, (error, info) => {
+        if (error) {
+          console.error('Erro ao enviar email:', error);
+        } else {
+          console.log('Email enviado:', info.response);
+        }
+      });
+      return res.json({ success: "Parceiro aprovado com sucesso." });
+    } catch (err) {
+      console.log(err);
+      return res.status(500).json({ error: "Erro ao aprovar parceiro." });
+    }
+  }
+
+  async denyPartner(req, res) {
+    const { storeId } = req.params;
+    try {
+      const store = await storeModel.findById(storeId);
+      if (!store) return res.status(404).json({ error: "Loja/parceiro não encontrado." });
+      // Enviar email de recusa antes de deletar
+      const transporter = nodemailer.createTransport({
+        service: 'gmail',
+        auth: {
+          user: process.env.EMAIL_USER,
+          pass: process.env.EMAIL_PASS,
+        },
+      });
+      const mailOptions = {
+        from: process.env.EMAIL_USER,
+        to: store.email,
+        subject: 'Solicitação de parceria recusada',
+        text: `Olá ${store.ownerName},\n\nInfelizmente sua solicitação para ser parceiro da Fardo Fashion foi recusada.\n\nSe desejar, entre em contato para mais informações.\n\nAtenciosamente,\nEquipe Fardo Fashion`,
+      };
+      transporter.sendMail(mailOptions, (error, info) => {
+        if (error) {
+          console.error('Erro ao enviar email de recusa:', error);
+        } else {
+          console.log('Email de recusa enviado:', info.response);
+        }
+      });
+      await storeModel.findByIdAndDelete(storeId);
+      return res.json({ success: "Solicitação de parceiro negada e removida." });
+    } catch (err) {
+      console.log(err);
+      return res.status(500).json({ error: "Erro ao negar parceiro." });
     }
   }
 }

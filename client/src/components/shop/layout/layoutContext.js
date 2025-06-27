@@ -9,6 +9,7 @@ export const layoutState = {
   cartTotalCost: null,
   orderSuccess: false,
   loading: false,
+  partnerSignupModal: false,
 };
 
 export const layoutReducer = (state, action) => {
@@ -22,6 +23,11 @@ export const layoutReducer = (state, action) => {
       return {
         ...state,
         loginSignupModal: action.payload,
+      };
+    case "partnerSignupModalToggle":
+      return {
+        ...state,
+        partnerSignupModal: action.payload,
       };
     case "cartModalToggle":
       return {

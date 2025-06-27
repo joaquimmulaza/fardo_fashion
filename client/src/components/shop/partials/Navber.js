@@ -333,6 +333,14 @@ const Navber = (props) => {
                 </svg>
               </div>
             )}
+            {/* Botão Ser Parceiro */}
+            <div
+              onClick={() => dispatch({ type: "partnerSignupModalToggle", payload: true })}
+              className="cursor-pointer hover:bg-yellow-200 px-2 py-2 rounded-lg ml-2"
+              title="Ser Parceiro"
+            >
+              <span className="font-semibold text-yellow-700">Ser Parceiro</span>
+            </div>
             {/* Cart Modal Button */}
             <div
               onClick={(e) => cartModalOpen()}

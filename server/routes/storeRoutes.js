@@ -26,4 +26,13 @@ router.delete("/store-products/:storeId/:productId", storeController.deleteStore
 // Rota para atualizar associação produto-loja
 router.put("/store-products/:storeId/:productId", storeController.updateStoreProduct);
 
+// Rota para cadastro de parceiro
+router.post("/partner-signup", storeController.partnerSignup);
+
+// Rota para admin aprovar parceiro
+router.put("/:storeId/approve", storeController.approvePartner);
+
+// Rota para admin negar parceiro
+router.put("/:storeId/deny", storeController.denyPartner);
+
 module.exports = router;

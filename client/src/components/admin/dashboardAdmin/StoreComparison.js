@@ -9,6 +9,8 @@ import {
   updateStore,
   deleteStoreProduct,
   updateStoreProduct,
+  approvePartner,
+  denyPartner,
 } from "./Action";
 import { getAllProduct } from "../products/FetchApi";
 
@@ -306,6 +308,9 @@ const StoreComparison = () => {
     setError(null);
   };
 
+  const pendingStores = data.storesList ? data.storesList.filter(store => store.pending) : [];
+  const approvedStores = data.storesList ? data.storesList.filter(store => !store.pending) : [];
+
   return (
     <div className="p-6">
       {error && (
@@ -351,11 +356,41 @@ const StoreComparison = () => {
           )}
         </form>
 
+        {pendingStores.length > 0 && (
+          <div className="mb-4">
+            <h3 className="text-lg font-semibold text-yellow-700 mb-2">Solicitações de Parceiro Pendentes</h3>
+            <ul className="space-y-2">
+              {pendingStores.map((store) => (
+                <li key={store._id} className="flex items-center justify-between p-3 bg-yellow-100 rounded-md shadow-sm border border-yellow-300">
+                  <div>
+                    <span className="font-bold text-yellow-800">{store.name}</span>
+                    <span className="ml-2 text-gray-700">(Parceiro: {store.ownerName}, Email: {store.email})</span>
+                  </div>
+                  <div className="flex gap-2">
+                    <button
+                      onClick={() => approvePartner(store._id, dispatch)}
+                      className="px-3 py-1 text-sm text-green-700 bg-green-100 hover:bg-green-200 rounded transition-colors border border-green-300"
+                    >
+                      Aprovar
+                    </button>
+                    <button
+                      onClick={() => denyPartner(store._id, dispatch)}
+                      className="px-3 py-1 text-sm text-red-700 bg-red-100 hover:bg-red-200 rounded transition-colors border border-red-300"
+                    >
+                      Negar
+                    </button>
+                  </div>
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
+
         <div className="bg-gray-50 rounded-lg p-4">
           <h3 className="text-lg font-semibold text-gray-700 mb-3">Lojas Cadastradas</h3>
           <ul className="space-y-2">
-            {data.storesList && data.storesList.length > 0 ? (
-              data.storesList.map((store) => (
+            {approvedStores && approvedStores.length > 0 ? (
+              approvedStores.map((store) => (
                 <li
                   key={store._id}
                   className="flex items-center justify-between p-3 bg-white rounded-md shadow-sm"
