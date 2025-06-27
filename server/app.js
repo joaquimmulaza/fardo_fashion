@@ -8,11 +8,10 @@ public -> uploads -> 1. products 2. customize 3. categories
 *** Now This folder will automatically create when we run the server file
 
 * Issue 2:
-For admin signup just go to the auth 
-controller then newUser obj, you will 
-find a role field. role:1 for admin signup & 
-role: 0 or by default it for customer signup.
-go user model and see the role field.
+For admin creation:
+1. Use the /api/admin-signup endpoint (requires admin authentication)
+2. Or manually change the userRole field in the database from 0 to 1
+By default, new users are created as customers (userRole: 0)
 
 */
 

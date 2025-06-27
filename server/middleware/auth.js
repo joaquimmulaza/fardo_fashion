@@ -23,7 +23,7 @@ exports.isAuth = (req, res, next) => {
     !req.userDetails._id ||
     loggedInUserId != req.userDetails._id
   ) {
-    res.status(403).json({ error: "You are not authenticate" });
+    return res.status(403).json({ error: "You are not authenticate" });
   }
   next();
 };
@@ -33,10 +33,10 @@ exports.isAdmin = async (req, res, next) => {
     let reqUser = await userModel.findById(req.body.loggedInUserId);
     // If user role 0 that's mean not admin it's customer
     if (reqUser.userRole === 0) {
-      res.status(403).json({ error: "Access denied" });
+      return res.status(403).json({ error: "Access denied" });
     }
     next();
   } catch {
-    res.status(404);
+    return res.status(404).json({ error: "User not found" });
   }
 };
